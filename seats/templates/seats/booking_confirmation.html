@@ -1,0 +1,46 @@
+{% extends 'seats/base.html' %}
+{% load static %}
+{% block title %}Booking Confirmation{% endblock %}
+
+{% block content %}
+<div class="confirmation-card card">
+    <div class="icon" style="font-size: 4rem; color: var(--success-color); margin-bottom: 1rem;">
+        <i class="fa-solid fa-check-circle fa-beat"></i>
+    </div>
+    <h1>Booking Pending</h1>
+    <p class="lead" style="color: var(--text-secondary);">
+        Your reservation for seat <strong>{{ seat.name }}</strong> at <strong>{{ seat.location.name }}</strong> is almost complete.
+    </p>
+    <div class="important-note" style="background-color: var(--bg-tertiary); padding: 1.5rem; border-radius: var(--border-radius-md); margin: 2rem 0;">
+        <p><strong>Next Step:</strong> You must report to the admin desk to confirm your booking.</p>
+        <div id="confirmation-countdown-timer" style="font-weight: 600; font-size: 1.2rem; color: var(--warning-color);"></div>
+    </div>
+    <div class="action-buttons" style="display: flex; justify-content: center; gap: 1rem;">
+        <a href="{% url 'seats:seat_dashboard' %}" class="btn btn--secondary"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+        <a href="{% url 'seats:my_reservations' %}" class="btn btn--primary">View My Reservations</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const initPage = () => {
+    const timerElement = document.getElementById('confirmation-countdown-timer');
+    if (!timerElement) return;
+    const reservedTime = new Date("{{ seat.reserved_until.isoformat }}").getTime();
+    const interval = setInterval(() => {
+        const distance = reservedTime - new Date().getTime();
+        if (distance < 0) {
+            clearInterval(interval);
+            timerElement.innerHTML = "<strong>This reservation has EXPIRED!</strong>";
+            timerElement.style.color = "var(--danger-color)";
+            return;
+        }
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        timerElement.innerHTML = `Time left to confirm: <strong>${minutes}m ${seconds}s</strong>`;
+    }, 1000);
+};
+initPage();
+</script>
+{% endblock %}

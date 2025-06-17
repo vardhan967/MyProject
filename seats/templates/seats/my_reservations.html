@@ -1,0 +1,82 @@
+{% extends 'seats/base.html' %}
+{% load static %}
+
+{% block title %}My Reservations{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4 text-center">My Reservations</h1>
+
+    {% if user_reserved_seats %}
+        <div class="seat-grid">
+            {% for seat in user_reserved_seats %}
+                {# Seat is either 'reserved' (confirmed) or 'pending_confirmation' for the current user #}
+                {% if seat.status == 'pending_confirmation' %}
+                    <div class="seat-card pending" data-reserved-until="{{ seat.reserved_until|date:'U' }}">
+                        <div class="seat-name">{{ seat.name }}</div>
+                        <div class="seat-location text-muted">{{ seat.location.name }}</div>
+                        <div class="seat-status">Pending Confirmation</div>
+                        <div class="countdown-timer" id="timer-{{ seat.id }}"></div>
+                        <p class="text-danger small mt-2">Report to admin within timer.</p>
+                        <form action="{% url 'seats:release_seat' seat.id %}" method="post" class="form-release-seat mt-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning btn-sm">Cancel Booking</button>
+                        </form>
+                    </div>
+                {% else %} {# seat.status == 'reserved' #}
+                    <div class="seat-card reserved">
+                        <div class="seat-name">{{ seat.name }}</div>
+                        <div class="seat-location text-muted">{{ seat.location.name }}</div>
+                        <div class="seat-status">Confirmed Reservation</div>
+                        <div class="text-muted small">Confirmed until: {{ seat.reserved_until|date:"M d, Y H:i" }}</div>
+                        <form action="{% url 'seats:release_seat' seat.id %}" method="post" class="form-release-seat mt-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning btn-sm">Release</button>
+                        </form>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center" role="alert">
+            You do not have any active seat reservations.
+            <a href="{% url 'seats:seat_dashboard' %}" class="alert-link">Go to Seat Dashboard to book a seat.</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{# Keep the timer script for pending seats if you want it to expire #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pendingSeats = document.querySelectorAll('.seat-card.pending');
+
+        pendingSeats.forEach(seatCard => {
+            const reservedUntilTimestamp = parseInt(seatCard.dataset.reservedUntil) * 1000;
+            const seatId = seatCard.querySelector('[id^="timer-"]').id.replace('timer-', '');
+            const timerElement = document.getElementById(`timer-${seatId}`);
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = reservedUntilTimestamp - now;
+
+                if (distance < 0) {
+                    timerElement.innerHTML = "Expired!";
+                    seatCard.classList.remove('pending');
+                    seatCard.classList.add('unavailable'); // Or 'available'
+                    clearInterval(countdownInterval);
+                    // window.location.reload(); // Might want to refresh or update
+                    return;
+                }
+
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                timerElement.innerHTML = `Time left: ${minutes}m ${seconds}s`;
+            }
+
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown();
+        });
+    });
+</script>
+{% endblock %}

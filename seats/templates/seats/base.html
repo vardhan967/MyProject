@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Seat Booking{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #343a40; /* Darker navbar */
+        }
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .seat-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s ease-in-out;
+            border: 2px solid; /* For status-based borders */
+        }
+        .seat-card:hover {
+            transform: translateY(-5px);
+        }
+        .seat-card.available {
+            border-color: #28a745; /* Green */
+        }
+        .seat-card.reserved {
+            border-color: #ffc107; /* Yellow for 'Reserved by You' */
+        }
+        .seat-card.unavailable {
+            border-color: #dc3545; /* Red for 'Reserved by Others' */
+        }
+        .seat-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .seat-location {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .seat-status {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .seat-card.available .seat-status {
+            color: #28a745;
+        }
+        .seat-card.reserved .seat-status {
+            color: #ffc107;
+        }
+        .seat-card.unavailable .seat-status {
+            color: #dc3545;
+        }
+        .btn-sm {
+            padding: .25rem .5rem;
+            font-size: .875rem;
+        }
+        .static-info {
+            background-color: #e9ecef;
+            padding: 2rem;
+            border-radius: .5rem;
+            margin-bottom: 3rem;
+        }
+        .static-info h3 {
+            color: #007bff;
+        }
+        .static-info ul {
+            padding-left: 20px;
+        }
+        .static-info ul li {
+            margin-bottom: 8px;
+        }
+        .static-info .lead {
+            font-size: 1.15rem;
+        }
+        /* Style for the search/filter form */
+        .form-control, .form-select {
+            border-radius: .25rem;
+        }
+        .btn-primary, .btn-secondary {
+            border-radius: .25rem;
+        }
+        .col-form-label {
+            font-weight: bold;
+        }
+        /* Adjust column widths for filters if needed */
+        .row.g-3 > .col-md-2, .row.g-3 > .col-md-3 {
+            flex: 0 0 auto;
+            width: auto;
+        }
+        .alert {
+            margin-bottom: 10px;
+        }
+        .seat-card.available {
+        border-color: #28a745; /* Green */
+    }
+    .seat-card.reserved {
+        border-color: #ffc107; /* Yellow for 'Reserved by You' (Confirmed) */
+    }
+    .seat-card.pending {
+        border-color: #fd7e14; /* Orange for 'Pending Confirmation' */
+    }
+    .seat-card.unavailable {
+        border-color: #dc3545; /* Red for 'Reserved by Others' */
+    }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            {# CORRECTED URL HERE #}
+            <a class="navbar-brand" href="{% url 'seats:seat_dashboard' %}">Seat Booking</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        {# CORRECTED URL HERE #}
+                        <a class="nav-link" href="{% url 'seats:seat_dashboard' %}">Seat Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'seats:my_reservations' %}">My Reservations</a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="navbar-text me-2">Welcome, {{ user.username }}!</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-light btn-sm" href="{% url 'accounts:logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {# Messages Framework #}
+        {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message|safe }} {# ADDED |safe FILTER HERE #}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

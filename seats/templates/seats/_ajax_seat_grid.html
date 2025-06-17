@@ -1,0 +1,37 @@
+{% for location, seats in grouped_seats.items %}
+    <section class="location-group collapsible-group active">
+        <div class="location-group-header">
+            <h2 style="display: flex; align-items: center; gap: 0.75rem; font-weight: 600;"><i class="fa-solid {{ location.icon|default:'fa-building-columns' }}"></i> {{ location.name }}</h2>
+            <span class="location-group-count">{{ seats|length }} Seats</span>
+        </div>
+        <div class="seat-grid">
+            {% for seat in seats %}
+            <div class="seat-tile 
+                {% if seat.status == 'available' %}seat-tile--available{% endif %}
+                {% if seat.status == 'pending_confirmation' %}seat-tile--pending{% endif %}
+                {% if seat.status == 'reserved' %}seat-tile--reserved{% endif %}
+                {% if seat.status != 'available' and seat.booked_by != user %}seat-tile--unavailable{% endif %}"
+                data-seat-name="{{ seat.name }}"
+                data-location="{{ seat.location.name }}"
+                data-status="{{ seat.status }}"
+                data-action-url="{% if seat.status == 'available' %}{% url 'seats:book_seat' seat.id %}{% endif %}">
+                <div>
+                    <h3 class="seat-tile__name">{{ seat.name }}</h3>
+                    <p class="seat-tile__location">{{ seat.location.name }}</p>
+                </div>
+                <div class="seat-tile__status">
+                    {% if seat.status == 'available' %}<i class="fa-solid fa-check" style="color:var(--success-color)"></i> Available{% endif %}
+                    {% if seat.status == 'pending_confirmation' %}<i class="fa-solid fa-clock" style="color:var(--warning-color)"></i> Pending{% endif %}
+                    {% if seat.status == 'reserved' %}<i class="fa-solid fa-lock" style="color:var(--danger-color)"></i> In Use{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+{% empty %}
+    <div class="card" style="text-align: center; padding: 3rem;">
+        <i class="fa-solid fa-magnifying-glass" style="font-size: 3rem; color: var(--text-muted);"></i>
+        <p style="margin-top: 1rem; color: var(--text-secondary);">No seats found matching your criteria.</p>
+        <a href="{% url 'seats:seat_dashboard' %}" class="btn btn--primary" style="margin-top: 1rem;">Reset All Filters</a>
+    </div>
+{% endfor %}

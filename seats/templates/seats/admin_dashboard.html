@@ -1,0 +1,55 @@
+{% extends 'seats/base.html' %}
+{% load static %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+    <div class="page-header">
+        <h1>Admin Dashboard</h1>
+        <p>An overview of your library's seat management system.</p>
+    </div>
+    <div class="admin-grid">
+        <a class="stat-card card" href="{% url 'seats:admin_checkin_dashboard' %}" style="text-decoration:none; text-align: center;">
+            <div class="info">
+                <p class="title">Pending Check-in</p>
+                <p class="value" style="color: var(--warning-color);">{{ pending_confirmations }}</p>
+            </div>
+        </a>
+        <div class="stat-card card" style="text-align: center;">
+            <div class="info"><p class="title">Seats In Use</p><p class="value">{{ seats_in_use }}</p></div>
+        </div>
+        <div class="stat-card card" style="text-align: center;">
+            <div class="info"><p class="title">Available Now</p><p class="value">{{ available_seats }}</p></div>
+        </div>
+        <div class="stat-card card" style="text-align: center;">
+            <div class="info"><p class="title">Total Capacity</p><p class="value">{{ total_seats }}</p></div>
+        </div>
+        <div class="card" style="grid-column: span 1 / -1;">
+             <h3>Usage by Location</h3>
+             <div style="height: 300px;"><canvas id="locationUsageChart"></canvas></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const initPage = () => {
+    const isDarkMode = document.body.dataset.theme === 'dark';
+    Chart.defaults.color = isDarkMode ? 'rgba(203, 213, 225, 0.7)' : 'rgba(71, 85, 105, 0.7)';
+    const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } };
+    new Chart(document.getElementById('locationUsageChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ location_labels|safe }},
+            datasets: [{
+                label: 'Seats in Use',
+                data: {{ location_data|safe }},
+                backgroundColor: isDarkMode ? 'rgba(59, 130, 246, 0.6)' : 'rgba(37, 99, 235, 0.7)',
+                borderRadius: 4,
+            }]
+        },
+        options: chartOptions
+    });
+};
+initPage();
+</script>
+{% endblock %}

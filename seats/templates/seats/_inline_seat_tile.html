@@ -1,0 +1,19 @@
+{% comment %} This file contains the display logic for a single seat tile. {% endcomment %}
+
+{% if seat.status == 'available' %}
+    {% with tile_type="available" icon="fa-couch" text="Available" action_url=seat.get_reserve_url action_text="Reserve Seat" %}
+        {% include 'seats/_tile_template.html' %}
+    {% endwith %}
+{% elif seat.user == user and seat.status == 'pending_confirmation' %}
+    {% with tile_type="pending" icon="fa-clock" text="My Pending Seat" action_url=seat.get_cancel_url action_text="Cancel Reservation" %}
+        {% include 'seats/_tile_template.html' %}
+    {% endwith %}
+{% elif seat.user == user and seat.status == 'reserved' %}
+    {% with tile_type="reserved" icon="fa-user-check" text="My Reserved Seat" action_url=seat.get_cancel_url action_text="Release My Seat" %}
+        {% include 'seats/_tile_template.html' %}
+    {% endwith %}
+{% else %}
+    {% with tile_type="unavailable" icon="fa-lock" text="In Use" action_url="" action_text="" %}
+        {% include 'seats/_tile_template.html' %}
+    {% endwith %}
+{% endif %}

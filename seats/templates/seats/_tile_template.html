@@ -1,0 +1,24 @@
+<div class="seat-tile seat-tile--{{ tile_type }}"
+    data-seat-name="{{ seat.name }}"
+    data-location="{{ seat.location.name }}"
+    data-status="{{ seat.status }}"
+    data-status-text="{{ text }}"
+    {% if action_url %}data-action-url="{{ action_url }}"{% endif %}
+    {% if action_text %}data-action-text="{{ action_text }}"{% endif %}
+    {% if seat.reserved_until %}
+        data-reserved-until-timestamp="{{ seat.reserved_until.timestamp }}"
+        data-reserved-until="{{ seat.reserved_until|time:'H:i' }}"
+    {% endif %}
+>
+    <div class="seat-tile__header">
+        <h3 class="seat-tile__name">{{ seat.name }}</h3>
+        <div class="seat-tile__status-icon"><i class="fa-solid {{ icon }}"></i></div>
+    </div>
+    <div class="seat-tile__body">
+        <p class="seat-tile__location">{{ seat.location.name }}</p>
+        <p class="seat-tile__status-text">{{ text }}</p>
+    </div>
+    <div class="seat-tile__footer">
+        {% if action_url %}<span class="seat-tile__action-hint">View Details →</span>{% endif %}
+    </div>
+</div>

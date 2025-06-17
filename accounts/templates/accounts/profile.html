@@ -1,0 +1,71 @@
+{% extends 'seats/base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Profile</h1>
+    <p>View your account details and complete reservation history.</p>
+</div>
+
+<div class="profile-grid">
+    <!-- Profile Information Card -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">{{ user.username|first|upper }}</div>
+            <div class="profile-header-info">
+                <h2>{{ user.username }}</h2>
+                <p>{% if user.is_staff %}Administrator Account{% else %}Student Account{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Card -->
+    <div class="profile-card">
+        <h3>Change Password</h3>
+        <p class="text-secondary">For your security, you will be logged out after successfully changing your password.</p>
+        <a href="{% url 'accounts:password_change' %}" class="btn-tweaky btn-secondary-tweaky" style="margin-top: 1rem;">
+            <i class="fa-solid fa-key"></i> Change Your Password
+        </a>
+    </div>
+
+    <!-- Reservation History Card -->
+    <div class="profile-card history-card">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Reservation History</h3>
+        <div class="tweaky-table-wrapper">
+            <table class="tweaky-table">
+                <thead>
+                    <tr>
+                        <th>Seat</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Date of Booking</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservation_history %}
+                    <tr>
+                        <td><strong>{{ reservation.name }}</strong></td>
+                        <td>{{ reservation.location.name }}</td>
+                        <td>
+                            <span class="status-badge-table status-{{ reservation.status }}">
+                                {{ reservation.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ reservation.reserved_at|date:"M d, Y, P" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding: 2rem;">You have no reservation history.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- No page-specific JavaScript is needed for this page. -->
+{% endblock %}
